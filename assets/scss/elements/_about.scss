@@ -276,10 +276,17 @@
                             line-height: 60px;
 
                             img {
-                                max-width: 23px;
+                                max-width: 30px;
                             }
                         }
                     }
+					&.skill-highlight{
+						li {
+							img{
+								max-width: 35px;
+							}
+						}
+					}
                 }
             }
         }
