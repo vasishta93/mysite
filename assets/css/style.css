@@ -275,7 +275,7 @@ h6 a,
     font-size: 20px; }
   h5,
   .h5 {
-    font-size: 16px; } }
+    font-size: 23px; } }
 
 h1,
 .h1,
@@ -9306,7 +9306,7 @@ figcaption {
       background: var(--background-color-1);
       box-shadow: var(--shadow-1); }
       .slide .skill-share-inner .skill-share li img {
-        max-height: 23px;
+        max-height: 35px;
         width: auto; }
   .slide .thumbnail {
     position: relative;
@@ -12326,8 +12326,14 @@ div#featured-project-carousel {
   height: 60px;
   line-height: 60px; }
   .sticky-home-wrapper .rn-skill-area .inner .skill-share-inner.skill-share-inner-width li img {
-    max-width: 23px; }
+    max-width: 30px; }
 
+.sticky-home-wrapper .rn-skill-area .inner .skill-share-inner.skill-highlight .skill-share li img {
+	max-height: 35px; }
+	@media only screen and (max-width: 479px) {
+	  .sticky-home-wrapper .rn-skill-area .inner .skill-share-inner.skill-highlight .skill-share li img {
+		max-height: 30px; } }
+			
 .sticky-home-wrapper .single-card-sticky .card-list {
   margin: 0;
   padding: 0; }
