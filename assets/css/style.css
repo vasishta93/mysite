@@ -4419,7 +4419,7 @@ Background Image
   background-image: url(../images/bg/bg-image-11.jpg); }
 
 .bg_image--12 {
-  background-image: url(../images/bg/bg-image-12.jpg); }
+  background-image: url(../images/bg/notion.png); }
 
 .bg_image--13 {
   background-image: url(../images/bg/bg-image-13.jpg); }
@@ -12333,7 +12333,7 @@ div#featured-project-carousel {
 	@media only screen and (max-width: 479px) {
 	  .sticky-home-wrapper .rn-skill-area .inner .skill-share-inner.skill-highlight .skill-share li img {
 		max-height: 30px; } }
-			
+
 .sticky-home-wrapper .single-card-sticky .card-list {
   margin: 0;
   padding: 0; }
