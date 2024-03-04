@@ -9133,7 +9133,9 @@ figcaption {
       .slide .content {
         margin-top: 40px; } }
     .slide .content .inner {
-      margin-bottom: 142px; }
+      margin-bottom: 142px;
+      padding: 20px 20px;
+      max-width: 455px; }
       @media only screen and (max-width: 1199px) {
         .slide .content .inner {
           margin-bottom: 40px !important; } }
@@ -9152,6 +9154,8 @@ figcaption {
         @media only screen and (max-width: 479px) {
           .slide .content .inner span.subtitle {
             letter-spacing: 1px; } }
+      .slide .content .inner h4 {
+        color: #000000; }
       .slide .content .inner .title {
         color: #ffffff;
         font-weight: 700;
