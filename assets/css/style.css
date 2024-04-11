@@ -36,16 +36,16 @@
 32. White Version
 ----------------------------*/
 /* Default  */
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700&display=swap");
-@import url("https://fonts.googleapis.com/css2?family=Nunito:wght@200;300;400;500;600;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap");
+
 :root {
-  --color-primary: #ff014f;
+  --color-primary: #A653F6;
   --color-secondary: #f4f5f6;
   --color-tertiary: #0d1013;
   --color-gray: #f6f6f6;
-  --color-subtitle: #f9004d;
-  --background-color-1: linear-gradient(145deg, #1e2024, #23272b);
-  --background-color-2: #212428;
+  --color-subtitle: #A653F6;
+  --background-color-1: linear-gradient(145deg, #1e1b1d, #23272b);
+  --background-color-2: #1e1b1d;
   --shadow-1: 10px 10px 19px #1c1e22,
         -10px -10px 19px #262a2e;
   --shadow-2: inset 21px 21px 19px #181a1d, inset -21px -21px 19px #202225;
@@ -93,8 +93,8 @@
   --s-extra-bold: 800;
   --s-black: 900;
   --transition: 0.4s;
-  --font-primary: 'Nunito', sans-serif;
-  --font-secondary: 'Nunito', sans-serif;
+  --font-primary: 'Nunito sans', sans-serif;
+  --font-secondary: 'Nunito sans', sans-serif;
   --font-size-b1: 18px;
   --font-size-b2: 22px;
   --font-size-b3: 14px;
@@ -5193,7 +5193,7 @@ textarea:-ms-input-placeholder {
       box-shadow: var(--shadow-1); }
       .social-share-style-1 .social-share li a.only-border {
         background: transparent;
-        border: 1px solid #ff014f87; }
+        border: 1px solid #A653F687; }
         .social-share-style-1 .social-share li a.only-border::before {
           display: none; }
       .social-share-style-1 .social-share li a.border-white {
