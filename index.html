@@ -10,17 +10,23 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="styles.css">
+  <style>
+    .ai-heading p { color: #26301f !important; }
+    .ai-section .section-label, .build-grid span { color: #35432b !important; }
+    .reveal { animation: none !important; opacity: 1 !important; transform: none !important; }
+  </style>
 </head>
 <body>
   <a class="skip-link" href="#main">Skip to content</a>
   <header class="site-header shell">
     <a class="brand" href="/" aria-label="Vasishta Chary home">VC<span>.</span></a>
-    <nav aria-label="Primary navigation">
+    <nav class="desktop-nav" aria-label="Primary navigation">
       <a href="#story">Story</a>
       <a href="#builds">AI builds</a>
       <a href="#contact">Contact</a>
     </nav>
     <span class="status"><i></i> available for the right fire</span>
+    <details class="mobile-nav"><summary aria-label="Open menu">Menu</summary><div><a href="#story">Story</a><a href="#builds">AI builds</a><a href="#contact">Contact</a></div></details>
   </header>
 
   <main id="main">
@@ -28,8 +34,8 @@
       <div class="hero-copy reveal">
         <p class="eyebrow">Startup operator / since 2011</p>
         <h1>I help startups turn chaos into <em>systems, markets &amp; momentum.</em></h1>
-        <p class="lede">I work hands-on with founders across go-to-market, community building, operations and the messy work of making something real.</p>
-        <div class="hero-actions"><a class="button button-primary" href="#story">Start here <span>↓</span></a><a class="text-link" href="#builds">See what I’m building <span>↗</span></a></div>
+        <p class="lede">Since 2011, I’ve worked hands-on with startups—finding markets, building communities and fixing the systems that keep ambitious teams from moving.</p>
+        <div class="hero-actions"><a class="button button-primary" href="#contact">Tell me what’s broken <span>↗</span></a><a class="text-link" href="#builds">See what I’m building <span>↗</span></a></div>
       </div>
       <div class="hero-visual reveal reveal-delay">
         <div class="portrait-wrap"><img src="assets/images/slider/1.jpg" alt="Portrait of Vasishta Chary"></div>
@@ -64,29 +70,29 @@
 
     <section class="section shell proof-grid">
       <div class="proof-card proof-community"><span class="card-kicker">COMMUNITIES</span><strong>25+</strong><p>Founder, reader and community-builder networks built around real value and belonging.</p><a href="#contact">Work with me ↗</a></div>
-      <div class="proof-card proof-case"><span class="card-kicker">CLIENT / LETSHANG THERE</span><h3>Helping a real product find its next move.</h3><p>I work closely with Letshang There to understand what is actually breaking, build the right systems around it and move the work from idea to execution.</p></div>
+      <div class="proof-card proof-case"><span class="card-kicker">CLIENT / LETSHANG</span><h3>CMO, close to the work.</h3><p>At Letshang, I work across positioning, demand generation, systems and execution—staying close to the team until the work moves.</p><a href="#contact">Tell me what’s broken ↗</a></div>
     </section>
 
     <section class="logo-rail shell" aria-label="Selected organisations and communities">
       <div class="section-label">Selected organisations &amp; communities</div>
-      <div class="logo-grid"><img src="assets/images/client/png/c1.png" alt="Organisation logo"><img src="assets/images/client/png/c2.png" alt="Organisation logo"><img src="assets/images/client/png/c3.png" alt="Organisation logo"><img src="assets/images/client/png/c4.png" alt="Organisation logo"><img src="assets/images/client/png/c5.png" alt="Organisation logo"><img src="assets/images/client/png/c6.png" alt="Organisation logo"><img src="assets/images/client/png/c7.png" alt="Organisation logo"><img src="assets/images/client/png/c8.png" alt="Organisation logo"><img src="assets/images/client/png/c9.png" alt="Organisation logo"><img src="assets/images/client/png/c10.png" alt="Organisation logo"><img src="assets/images/client/png/c11.png" alt="Organisation logo"><img src="assets/images/client/png/c12.png" alt="Organisation logo"></div>
+      <div class="logo-grid"><img src="assets/images/client/png/c1.png" alt="Selected client logo"><img src="assets/images/client/png/c2.png" alt="Selected client logo"><img src="assets/images/client/png/c3.png" alt="Selected client logo"><img src="assets/images/client/png/c4.png" alt="Selected client logo"><img src="assets/images/client/png/c5.png" alt="Selected client logo"><img src="assets/images/client/png/c6.png" alt="Selected client logo"><img src="assets/images/client/png/c7.png" alt="Selected client logo"><img src="assets/images/client/png/c8.png" alt="Selected client logo"><img src="assets/images/client/png/c9.png" alt="Selected client logo"><img src="assets/images/client/png/c10.png" alt="Selected client logo"><img src="assets/images/client/png/c11.png" alt="Selected client logo"><img src="assets/images/client/png/c12.png" alt="Selected client logo"></div>
     </section>
 
     <section class="orbit shell" aria-label="Current work and associations">
       <div class="section-label">Current orbit</div>
-      <div class="orbit-grid"><a href="https://headstart.in/" class="orbit-card orbit-headstart"><span>VOLUNTEER</span><strong>Headstart</strong><small>Founder communities &amp; startup ecosystems</small></a><a href="#contact" class="orbit-card orbit-letshang"><span>CMO</span><strong>Letshang</strong><small>Hands-on systems, GTM &amp; execution</small></a><a href="#contact" class="orbit-card orbit-farm"><span>FOUNDER &amp; BREWMASTER</span><strong>FarmtoCups</strong><small>Recipes, sourcing &amp; B2B growth</small></a></div>
+      <div class="orbit-grid"><a href="https://headstart.in/" class="orbit-card orbit-headstart"><span>VOLUNTEER</span><strong>Headstart</strong><small>Founder communities and startup ecosystems</small></a><a href="#contact" class="orbit-card orbit-letshang"><span>CMO</span><strong>Letshang</strong><small>Positioning, demand generation and execution</small></a><a href="#contact" class="orbit-card orbit-farm"><span>FOUNDER &amp; BREWMASTER</span><strong>FarmtoCups</strong><small>Sourcing, recipes, product and B2B growth</small></a></div>
     </section>
 
     <section class="section ai-section" id="builds">
-      <div class="shell"><div class="section-label">04 / Public workshop</div><div class="ai-heading"><h2>Building with AI.<br><em>Sharing the playbook.</em></h2><p>I’m building dashboards, products, websites, automations and workflows with AI. The goal is not to show off a finished tool—it’s to show enough of the thinking that you can build your own.</p></div><div class="build-grid"><article><span>01 / workflow</span><h3>My AI operating system</h3><p>A personal automation layer for moving information through the parts of life and work that matter.</p><a href="#contact">Coming soon ↗</a></article><article><span>02 / product</span><h3>Useful things, quickly</h3><p>Small tools and dashboards built to answer real questions and make work more hands-on.</p><a href="#contact">Add your build ↗</a></article><article><span>03 / prompts</span><h3>Copy the starting point</h3><p>Prompts and getting-started documents to help you build your own systems with AI.</p><a href="#contact">Playbooks soon ↗</a></article></div></div>
+      <div class="shell"><div class="section-label">04 / Public workshop</div><div class="ai-heading"><h2>Building with AI.<br><em>Sharing the playbook.</em></h2><p>I’m building dashboards, products, websites, automations and workflows with AI. This is where I’ll share the useful parts: what I built, why I built it and how you can start.</p></div><div class="build-grid"><article><span>01 / workflow</span><h3>My AI operating system</h3><p>A personal automation layer for moving information through the parts of life and work that matter.</p><a href="#contact">Ask me about it ↗</a></article><article><span>02 / product</span><h3>Useful things, quickly</h3><p>Small tools and dashboards built to answer real questions and make work more hands-on.</p><a href="#contact">See the next build ↗</a></article><article><span>03 / prompts</span><h3>Copy the starting point</h3><p>Prompts and getting-started documents to help you build your own systems with AI.</p><a href="#contact">Get the playbook ↗</a></article></div></div>
     </section>
 
     <section class="section shell worlds">
-      <div class="section-label">05 / Work in the real world</div><div class="worlds-heading"><h2>Digital systems.<br>Physical things.</h2><p>FarmtoCups and Crust &amp; Kettle keep me close to ingredients, customers, compliance and the operational truth of building an F&amp;B business.</p></div><div class="world-grid"><article><span>FARMTOCUPS</span><h3>From farm to a better cup.</h3><p>I create recipes, work with sourcing and build the B2B funnel around high-quality flowers grown in India.</p></article><article><span>CRUST &amp; KETTLE</span><h3>Making food operations scale.</h3><p>I lead kitchen and tech operations—building SOPs, modular systems and structures for operational efficiency.</p></article></div></section>
+      <div class="section-label">05 / Work in the real world</div><div class="worlds-heading"><h2>Digital systems.<br>Physical things.</h2><p>FarmtoCups and Crust &amp; Kettle keep me close to ingredients, customers, compliance and the operational truth of building an F&amp;B business.</p></div><div class="world-grid"><article><span>FARMTOCUPS</span><h3>Founder &amp; brewmaster.</h3><p>I work across sourcing, recipes, product development and the B2B funnel around high-quality flowers grown in India.</p></article><article><span>CRUST &amp; KETTLE</span><h3>Kitchen &amp; tech operations.</h3><p>I build SOPs, modular systems and structures that make food operations more efficient and ready to scale.</p></article></div></section>
 
     <section class="section shell personal"><div class="section-label">06 / The rest of the picture</div><h2>The things that<br><em>keep me curious.</em></h2><div class="interest-grid"><div><span>BOOKS</span><p>Stories teach me how to build narratives that people want to enter.</p><small>Harry Potter · Eragon · Actionable Gamification</small></div><div><span>FOOD</span><p>Cooking is where I create: designing something out of nothing.</p><small>Recipes, authenticity, and the occasional obsession</small></div><div><span>TRAVEL</span><p>New places are a way to collect better questions.</p><small>Always learning from the road</small></div><div><span>EDUCATION + AGRO</span><p>I care about ethical building, access to education and the roots of how economies work.</p><small>Ex-Teach For India fellow · mentor</small></div></div></section>
 
-    <section class="contact dark-section" id="contact"><div class="shell contact-inner"><div class="section-label">07 / Let’s talk</div><h2>If your house is on fire,<br><em>call me.</em></h2><p>I’m interested in on-ground problems, useful systems and work that actually changes something.</p><a class="button button-primary" href="mailto:hello@vasishtachary.com">hello@vasishtachary.com <span>↗</span></a><div class="socials"><a href="https://www.linkedin.com/in/vasishtachary/">LinkedIn</a><a href="https://github.com/vasishta93">GitHub</a><a href="https://www.instagram.com/kawibaba/">Instagram</a></div></div></section>
+    <section class="contact dark-section" id="contact"><div class="shell contact-inner"><div class="section-label">07 / Let’s talk</div><h2>If your house is on fire,<br><em>call me.</em></h2><p>Tell me what’s broken, what you’re building, and where you’re stuck. I’m interested in on-ground problems, useful systems and work that actually changes something.</p><a class="button button-primary" href="mailto:hello@vasishtachary.com?subject=Startup%20systems%20%2F%20GTM%20conversation">Tell me what’s broken <span>↗</span></a><div class="socials"><a href="https://www.linkedin.com/in/vasishtachary/">LinkedIn</a><a href="https://github.com/vasishta93">GitHub</a><a href="https://www.instagram.com/kawibaba/">Instagram</a></div></div></section>
   </main>
   <footer class="shell footer"><span>© 2026 Vasishta Chary</span><span>Built slowly. Updated often.</span></footer>
 </body>
