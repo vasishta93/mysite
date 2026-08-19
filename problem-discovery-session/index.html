@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Problem Discovery workshop — an interactive HTML slide deck">
+  <title>Are We Solving the Right Problem?</title>
+  <style>
+    :root {
+      --paper: #f3eedf;
+      --paper-2: #e8dfcb;
+      --ink: #18201f;
+      --muted: #68716a;
+      --red: #e5482d;
+      --red-dark: #a92e1c;
+      --green: #174f45;
+      --yellow: #efc24d;
+      --white: #fffdf6;
+      --line: rgba(24,32,31,.2);
+      --shadow: 0 28px 80px rgba(22,31,27,.22);
+      --ease: cubic-bezier(.22,.8,.28,1);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; }
+    body {
+      color: var(--ink);
+      background:
+        radial-gradient(circle at 18% 16%, rgba(229,72,45,.14), transparent 24%),
+        radial-gradient(circle at 82% 82%, rgba(23,79,69,.15), transparent 28%),
+        #1a211f;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, a { font: inherit; }
+    button { color: inherit; }
+
+    .skip-link {
+      position: fixed; top: 10px; left: 10px; z-index: 999;
+      padding: 10px 14px; color: var(--white); background: var(--green);
+      transform: translateY(-160%); transition: transform .2s;
+    }
+    .skip-link:focus { transform: translateY(0); }
+
+    .grain {
+      position: fixed; inset: 0; pointer-events: none; z-index: 50; opacity: .24;
+      background-image:
+        repeating-linear-gradient(0deg, rgba(255,255,255,.03) 0, rgba(255,255,255,.03) 1px, transparent 1px, transparent 4px),
+        repeating-linear-gradient(90deg, rgba(0,0,0,.02) 0, rgba(0,0,0,.02) 1px, transparent 1px, transparent 5px);
+      mix-blend-mode: soft-light;
+    }
+
+    .deck { position: relative; width: 100%; height: 100%; }
+    .slide {
+      position: absolute; inset: 0; margin: auto;
+      width: min(100vw, calc(100vh * 16 / 9));
+      height: min(100vh, calc(100vw * 9 / 16));
+      padding: clamp(32px, 5vw, 76px);
+      display: grid; grid-template-rows: auto 1fr auto; gap: clamp(18px, 3vh, 34px);
+      overflow: hidden; background: var(--paper);
+      opacity: 0; visibility: hidden; transform: scale(.975) translateY(14px);
+      transition: opacity .38s var(--ease), transform .48s var(--ease), visibility .38s;
+      isolation: isolate;
+    }
+    .slide::before {
+      content: ""; position: absolute; inset: 0; z-index: -2;
+      background:
+        linear-gradient(90deg, transparent 0 7%, rgba(24,32,31,.045) 7% calc(7% + 1px), transparent calc(7% + 1px)),
+        linear-gradient(0deg, transparent 0 10%, rgba(24,32,31,.035) 10% calc(10% + 1px), transparent calc(10% + 1px));
+    }
+    .slide::after {
+      content: attr(data-index); position: absolute; right: -1.2vw; bottom: -7vh;
+      font-family: Georgia, "Times New Roman", serif; font-size: clamp(150px, 23vw, 390px);
+      line-height: 1; color: rgba(24,32,31,.035); z-index: -1; font-weight: 800;
+    }
+    .slide.active { opacity: 1; visibility: visible; transform: none; z-index: 2; }
+    .slide.dark { background: var(--ink); color: var(--paper); }
+    .slide.red { background: var(--red); color: var(--white); }
+    .slide.green { background: var(--green); color: var(--white); }
+    .slide.yellow { background: var(--yellow); color: var(--ink); }
+
+    .slide-head, .slide-foot { display: flex; align-items: center; justify-content: space-between; gap: 18px; }
+    .eyebrow, .folio, .kicker, .stamp, .tag {
+      font-family: "Courier New", ui-monospace, monospace; text-transform: uppercase;
+      letter-spacing: .14em; font-size: clamp(10px, .9vw, 14px); font-weight: 700;
+    }
+    .eyebrow { display: flex; align-items: center; gap: 10px; }
+    .eyebrow::before { content: ""; width: 28px; height: 4px; background: currentColor; }
+    .folio { opacity: .62; }
+    .source { font-size: clamp(9px, .72vw, 12px); color: inherit; opacity: .58; max-width: 76%; }
+    .source a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 2px; }
+    .speaker-note { display: none; }
+
+    .content { min-height: 0; align-self: center; width: 100%; }
+    h1, h2, h3, p { margin-top: 0; }
+    h1, h2, .serif {
+      font-family: Georgia, "Times New Roman", serif; font-weight: 700; letter-spacing: -.035em;
+    }
+    h1 { font-size: clamp(52px, 7.6vw, 128px); line-height: .88; margin-bottom: 28px; }
+    h2 { font-size: clamp(40px, 5.2vw, 86px); line-height: .95; margin-bottom: clamp(18px, 3vh, 38px); max-width: 14ch; }
+    h3 { font-size: clamp(18px, 1.7vw, 30px); line-height: 1.15; margin-bottom: 10px; }
+    p, li { font-size: clamp(15px, 1.45vw, 25px); line-height: 1.42; }
+    .lead { font-size: clamp(22px, 2.3vw, 40px); line-height: 1.24; max-width: 30ch; }
+    .display-line { font-family: Georgia, "Times New Roman", serif; font-size: clamp(32px, 4.2vw, 72px); line-height: 1.04; letter-spacing: -.03em; }
+    .accent { color: var(--red); }
+    .yellow .accent, .red .accent, .green .accent, .dark .accent { color: var(--yellow); }
+    .muted { color: var(--muted); }
+    .dark .muted, .red .muted, .green .muted { color: rgba(255,255,255,.68); }
+
+    .grid-2 { display: grid; grid-template-columns: 1.08fr .92fr; gap: clamp(24px, 5vw, 80px); align-items: center; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: clamp(12px, 2vw, 28px); }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: clamp(10px, 1.4vw, 20px); }
+    .stack { display: grid; gap: clamp(12px, 2vh, 22px); }
+    .columns { columns: 2; column-gap: 54px; }
+
+    .card {
+      padding: clamp(16px, 2vw, 28px); border: 1.5px solid currentColor;
+      background: rgba(255,255,255,.16); position: relative;
+    }
+    .card::before { content: ""; position: absolute; width: 10px; height: 10px; top: -1px; right: -1px; background: var(--red); }
+    .dark .card, .red .card, .green .card { background: rgba(255,255,255,.06); border-color: rgba(255,255,255,.38); }
+    .yellow .card::before, .red .card::before, .green .card::before, .dark .card::before { background: var(--yellow); }
+    .card p, .card li { font-size: clamp(13px, 1.12vw, 20px); }
+    .card p:last-child { margin-bottom: 0; }
+    .card-number { font: 800 clamp(28px, 3.4vw, 58px)/1 Georgia, serif; color: var(--red); margin-bottom: 14px; }
+    .dark .card-number, .red .card-number, .green .card-number, .yellow .card-number { color: var(--yellow); }
+
+    ul.clean { list-style: none; padding: 0; margin: 0; display: grid; gap: clamp(8px, 1.3vh, 16px); }
+    ul.clean li { position: relative; padding-left: 1.5em; }
+    ul.clean li::before { content: "→"; position: absolute; left: 0; color: var(--red); font-weight: 900; }
+    .dark ul.clean li::before, .red ul.clean li::before, .green ul.clean li::before { color: var(--yellow); }
+    .checklist li::before { content: "□" !important; }
+
+    .quote {
+      border-left: clamp(5px, .65vw, 10px) solid var(--red); padding-left: clamp(18px, 2.4vw, 38px);
+      font-family: Georgia, "Times New Roman", serif; font-size: clamp(28px, 3.5vw, 62px); line-height: 1.08;
+      max-width: 24ch; letter-spacing: -.025em;
+    }
+    .dark .quote, .red .quote, .green .quote { border-color: var(--yellow); }
+    .stamp {
+      display: inline-block; padding: 9px 13px 7px; border: 3px solid currentColor;
+      transform: rotate(-3deg); color: var(--red); background: rgba(243,238,223,.7);
+    }
+    .dark .stamp, .red .stamp, .green .stamp { color: var(--yellow); background: transparent; }
+    .tag { display: inline-block; padding: 7px 10px; background: var(--ink); color: var(--paper); }
+    .dark .tag, .green .tag { background: var(--yellow); color: var(--ink); }
+    .red .tag { background: var(--white); color: var(--red-dark); }
+
+    .timeline { display: grid; grid-template-columns: repeat(5, 1fr); margin-top: 32px; }
+    .timeline-step { position: relative; padding: 34px 16px 0 0; border-top: 2px solid currentColor; }
+    .timeline-step::before { content: ""; position: absolute; top: -8px; left: 0; width: 14px; height: 14px; border-radius: 50%; background: var(--red); }
+    .timeline-step strong { display: block; font-size: clamp(15px, 1.35vw, 23px); }
+    .timeline-step span { font-size: clamp(11px, .9vw, 15px); opacity: .68; }
+    .dark .timeline-step::before, .green .timeline-step::before, .red .timeline-step::before { background: var(--yellow); }
+
+    .flow { display: flex; align-items: stretch; gap: 0; margin-top: 30px; }
+    .flow > div { flex: 1; padding: 20px 14px; border: 1.5px solid currentColor; text-align: center; font-weight: 800; font-size: clamp(13px, 1.25vw, 21px); position: relative; }
+    .flow > div + div { border-left: 0; }
+    .flow > div + div::before { content: "›"; position: absolute; left: -9px; top: 50%; transform: translateY(-53%); font-size: 30px; background: var(--paper); line-height: .7; }
+    .dark .flow > div + div::before { background: var(--ink); }
+    .green .flow > div + div::before { background: var(--green); }
+    .red .flow > div + div::before { background: var(--red); }
+
+    .table { width: 100%; border-collapse: collapse; font-size: clamp(11px, 1.05vw, 18px); }
+    .table th, .table td { border-bottom: 1px solid currentColor; padding: clamp(7px, 1.1vh, 14px) 14px; text-align: left; vertical-align: top; }
+    .table th { font-family: "Courier New", monospace; text-transform: uppercase; letter-spacing: .08em; font-size: .8em; }
+    .table td:first-child { font-weight: 800; width: 22%; }
+
+    .six-p { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+    .six-p .p-item { min-width: 0; border-top: 7px solid var(--red); padding: 14px 8px 8px; }
+    .six-p strong { display: block; font-family: Georgia, serif; font-size: clamp(17px, 1.6vw, 28px); }
+    .six-p span { display: block; margin-top: 8px; font-size: clamp(10px, .75vw, 13px); opacity: .67; }
+    .dark .six-p .p-item, .green .six-p .p-item, .red .six-p .p-item { border-color: var(--yellow); }
+
+    .matrix { display: grid; grid-template-columns: 150px 1fr 1fr; grid-template-rows: 58px 1fr 1fr; min-height: 390px; }
+    .matrix > div { border: 1px solid currentColor; padding: 16px; }
+    .matrix .axis { display: grid; place-items: center; font: 700 12px/1.2 "Courier New", monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .matrix .quad { font-size: clamp(15px, 1.25vw, 22px); display: flex; flex-direction: column; justify-content: center; }
+    .matrix .quad strong { font-family: Georgia, serif; font-size: 1.35em; margin-bottom: 8px; }
+    .matrix .hot { background: var(--red); color: var(--white); }
+
+    .scenario { padding: clamp(18px, 2vw, 32px); background: var(--ink); color: var(--paper); border-left: 10px solid var(--red); }
+    .scenario .letter { font: 800 clamp(38px, 4vw, 70px)/.8 Georgia, serif; color: var(--yellow); float: left; margin-right: 18px; }
+    .scenario p { margin: 0; }
+
+    .brand-logo {
+      display: block; max-width: min(260px, 58%); max-height: 74px; object-fit: contain;
+      margin-bottom: 24px; filter: grayscale(1) contrast(1.15);
+    }
+    .red .brand-logo, .green .brand-logo, .dark .brand-logo { filter: brightness(0) invert(1); }
+    .brand-logo.logo-urban {
+      filter: none !important; mix-blend-mode: multiply;
+      width: 360px; max-width: 72%; height: 112px;
+      object-fit: cover; object-position: 50% 50%;
+    }
+    .brand-logo.logo-zerodha {
+      filter: none !important; mix-blend-mode: multiply;
+      width: 300px; max-width: 68%; height: 86px;
+      object-fit: cover; object-position: 50% 50%;
+    }
+    .brand-logo.logo-razorpay {
+      width: 340px; max-width: 62%; height: 104px;
+      object-fit: cover; object-position: 50% 48%;
+    }
+    .photo-frame { position: relative; min-height: 380px; overflow: hidden; border: 10px solid currentColor; }
+    .photo-frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+    .photo-frame.presenter {
+      width: min(390px, 78%); height: min(560px, 60vh); min-height: 0;
+      justify-self: center;
+    }
+    .photo-frame.presenter img { object-position: 50% 43%; }
+    .photo-frame::after { content: attr(data-caption); position: absolute; left: 16px; bottom: 16px; padding: 8px 11px; color: var(--paper); background: var(--ink); font: 700 11px/1.2 "Courier New", monospace; text-transform: uppercase; letter-spacing: .08em; }
+    .bio-marks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-top: 30px; }
+    .bio-marks div { border-top: 5px solid var(--red); padding-top: 10px; }
+    .bio-marks strong { display: block; font: 800 clamp(20px,2.3vw,38px)/1 Georgia,serif; }
+    .bio-marks span { display: block; margin-top: 5px; font-size: clamp(9px,.75vw,12px); text-transform: uppercase; letter-spacing: .08em; }
+
+    .reframe-diagram { display: grid; grid-template-columns: 1fr 56px 1fr 56px 1fr 56px 1.15fr; align-items: stretch; }
+    .reframe-node { padding: 22px 16px; border: 2px solid currentColor; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; }
+    .reframe-node strong { font-family: Georgia,serif; font-size: clamp(19px,1.8vw,30px); }
+    .reframe-node small { font-size: clamp(11px,.9vw,15px); opacity: .68; }
+    .reframe-arrow { display: grid; place-items: center; font-size: 34px; color: var(--red); }
+    .reframe-node.final { color: var(--white); background: var(--green); border-color: var(--green); }
+
+    .canvas { display: grid; grid-template-columns: repeat(3,1fr); border: 3px solid currentColor; background: rgba(255,255,255,.1); }
+    .canvas-cell { min-height: 145px; padding: 16px; border-right: 1px solid currentColor; border-bottom: 1px solid currentColor; position: relative; }
+    .canvas-cell:nth-child(3n) { border-right: 0; }
+    .canvas-cell:nth-last-child(-n+3) { border-bottom: 0; }
+    .canvas-cell b { display: block; font: 700 11px/1.2 "Courier New",monospace; text-transform: uppercase; letter-spacing: .09em; color: var(--red); margin-bottom: 10px; }
+    .canvas-cell p { font-size: clamp(12px,1vw,17px); margin: 0; color: inherit; opacity: .78; }
+    .red .canvas-cell b, .green .canvas-cell b, .dark .canvas-cell b { color: var(--yellow); }
+    .canvas.solution { grid-template-columns: 1.1fr 1fr 1fr; }
+    .prompt-box { margin-top: 18px; padding: 16px 20px; border-left: 8px solid var(--red); background: var(--ink); color: var(--paper); font-size: clamp(12px,1vw,17px); }
+    .prompt-box strong { color: var(--yellow); }
+    .closing-title { max-width: 17ch !important; margin-top: 34px; font-size: clamp(42px,4.6vw,76px); }
+
+    .notes {
+      position: fixed; z-index: 100; left: 50%; bottom: 78px; transform: translateX(-50%) translateY(20px);
+      width: min(920px, calc(100vw - 40px)); max-height: 42vh; overflow: auto;
+      padding: 22px 26px; background: rgba(16,21,20,.96); color: #fff; border: 1px solid rgba(255,255,255,.2);
+      box-shadow: var(--shadow); opacity: 0; visibility: hidden; transition: .25s var(--ease);
+    }
+    .notes.open { opacity: 1; visibility: visible; transform: translateX(-50%) translateY(0); }
+    .notes h3 { color: var(--yellow); font-family: "Courier New", monospace; text-transform: uppercase; letter-spacing: .1em; font-size: 13px; }
+    .notes p { font-size: 16px; line-height: 1.55; }
+
+    .controls {
+      position: fixed; left: 50%; bottom: 14px; transform: translateX(-50%); z-index: 80;
+      display: flex; align-items: center; gap: 8px; padding: 7px;
+      background: rgba(13,18,17,.9); color: #fff; border: 1px solid rgba(255,255,255,.16); border-radius: 999px;
+      box-shadow: 0 12px 30px rgba(0,0,0,.28); backdrop-filter: blur(12px);
+      transition: opacity .2s;
+    }
+    .controls button {
+      width: 38px; height: 38px; display: grid; place-items: center; border: 0; border-radius: 50%;
+      background: transparent; color: #fff; cursor: pointer;
+    }
+    .controls button:hover, .controls button:focus-visible { background: var(--red); outline: none; }
+    .counter { min-width: 74px; text-align: center; font: 700 12px/1 "Courier New", monospace; }
+    .progress { position: fixed; top: 0; left: 0; z-index: 90; height: 5px; background: var(--red); transition: width .35s var(--ease); }
+
+    .help {
+      position: fixed; inset: 0; z-index: 120; display: grid; place-items: center;
+      background: rgba(10,14,13,.86); opacity: 0; visibility: hidden; transition: .2s;
+    }
+    .help.open { opacity: 1; visibility: visible; }
+    .help-card { width: min(620px, calc(100vw - 40px)); padding: 34px; color: var(--paper); background: var(--ink); border: 2px solid var(--yellow); }
+    .help-card kbd { display: inline-block; min-width: 34px; padding: 5px 8px; text-align: center; background: #303936; border: 1px solid #58615e; border-radius: 4px; }
+
+    body.overview { overflow: auto; background: #17201d; }
+    body.overview .deck { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 22px; height: auto; padding: 28px; }
+    body.overview .slide {
+      position: relative; width: 100%; height: auto; aspect-ratio: 16 / 9; opacity: 1; visibility: visible; transform: none;
+      cursor: pointer; padding: 26px; box-shadow: 0 14px 34px rgba(0,0,0,.28);
+    }
+    body.overview .slide:hover { outline: 5px solid var(--yellow); transform: translateY(-4px); }
+    body.overview .slide h1 { font-size: 42px; }
+    body.overview .slide h2 { font-size: 30px; }
+    body.overview .slide p, body.overview .slide li { font-size: 10px; }
+    body.overview .slide .card { padding: 10px; }
+    body.overview .controls, body.overview .progress, body.overview .grain { position: fixed; }
+
+    .fragment { opacity: 0; transform: translateY(12px); transition: .4s var(--ease); }
+    .active .fragment.revealed, .overview .fragment { opacity: 1; transform: none; }
+
+    @media (max-width: 860px) {
+      .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 12px; }
+      .grid-3, .grid-4 { grid-template-columns: repeat(2, 1fr); }
+      .six-p { grid-template-columns: repeat(3, 1fr); }
+      .bio-marks { grid-template-columns: repeat(2,1fr); }
+      .reframe-diagram { grid-template-columns: 1fr; gap: 8px; }
+      .reframe-arrow { transform: rotate(90deg); }
+      .canvas, .canvas.solution { grid-template-columns: repeat(2,1fr); }
+      .columns { columns: 1; }
+      .slide { padding: 28px; }
+      .matrix { grid-template-columns: 90px 1fr 1fr; min-height: 280px; }
+    }
+
+    @media print {
+      html, body { overflow: visible; background: #fff; }
+      .deck { height: auto; }
+      .slide {
+        position: relative; width: 100vw; height: 56.25vw; page-break-after: always;
+        opacity: 1 !important; visibility: visible !important; transform: none !important;
+      }
+      .fragment { opacity: 1 !important; transform: none !important; }
+      .controls, .progress, .grain, .notes, .help { display: none !important; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation: none !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <a class="skip-link" href="#main">Skip to current slide</a>
+  <div class="grain" aria-hidden="true"></div>
+  <div class="progress" aria-hidden="true"></div>
+
+  <main class="deck" id="main" aria-live="polite">
+    <section class="slide dark active" data-index="01" aria-label="Title slide">
+      <header class="slide-head"><span class="eyebrow">Problem discovery</span><span class="folio">Workshop / 90 min</span></header>
+      <div class="content">
+        <span class="stamp fragment">Field Notes</span>
+        <h1 class="fragment">Are we solving<br>the <span class="accent">right</span> problem?</h1>
+        <p class="lead fragment">From attractive assumptions to evidence-backed decisions.</p>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Person → Progress → Problem → Proof → Potential → Probe</span><span class="folio">01</span></footer>
+      <aside class="speaker-note">Open with: “A beautifully built solution can still fail if our understanding of the customer, context, or problem is wrong.” Tell the room that today is about learning what is true—not defending ideas.</aside>
+    </section>
+
+    <section class="slide" data-index="02" aria-label="About Vasishta Chary">
+      <header class="slide-head"><span class="eyebrow">Your facilitator</span><span class="folio">Vasishta Chary</span></header>
+      <div class="content grid-2">
+        <div>
+          <span class="stamp fragment">Startup operator</span>
+          <h2 class="fragment" style="margin-top:22px">I work where ideas meet the <span class="accent">real world.</span></h2>
+          <p class="lead fragment">Since 2011, I’ve helped startups turn chaos into systems, markets and momentum.</p>
+          <div class="bio-marks fragment">
+            <div><strong>2011</strong><span>student founder</span></div>
+            <div><strong>25+</strong><span>communities built</span></div>
+            <div><strong>GTM</strong><span>markets found</span></div>
+            <div><strong>Now</strong><span>building with AI</span></div>
+          </div>
+        </div>
+        <div class="photo-frame presenter fragment" data-caption="Listen first. Build what matters."><img src="assets/vasishta.jpg" alt="Portrait of Vasishta Chary"></div>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Headstart • Letshang • FarmtoCups • Crust &amp; Kettle</span><span class="folio">02</span></footer>
+      <aside class="speaker-note">Introduce yourself briefly: hands-on startup operator since 2011; community builder; CMO close to execution; founder and F&amp;B operator. Connect your experience to today’s premise: the visible problem is rarely the real constraint.</aside>
+    </section>
+
+    <section class="slide" data-index="03" aria-label="Three startup situations">
+      <header class="slide-head"><span class="eyebrow">Opening challenge</span><span class="folio"></span></header>
+      <div class="content">
+        <h2>Three problems.<br><span class="accent">One choice.</span></h2>
+        <div class="grid-3">
+          <article class="scenario fragment"><span class="letter">A</span><p>“I need a reliable professional—but I don’t know whom to trust.”</p></article>
+          <article class="scenario fragment"><span class="letter">B</span><p>“I trade online—but I pay for the cost of an offline brokerage model.”</p></article>
+          <article class="scenario fragment"><span class="letter">C</span><p>“I run an online business—but accepting digital payments is painfully difficult.”</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Which would you invest in—and why?</strong><span class="folio">03</span></footer>
+      <aside class="speaker-note">Ask for a quick vote. Then ask: Who experiences each problem? How severe is it? What evidence would you demand? Resist revealing the companies for 3–4 minutes.</aside>
+    </section>
+
+    <section class="slide red" data-index="04" aria-label="Urban Company story">
+      <header class="slide-head"><span class="eyebrow">Case A / Market test</span><span class="folio">Urban Company</span></header>
+      <div class="content grid-2">
+        <div>
+          <img class="brand-logo logo-urban" src="assets/urban-company.png" alt="Urban Company logo">
+          <h2>From belief to<br><span class="accent">six requests.</span></h2>
+          <p class="lead">A low-cost demand test before a complete marketplace.</p>
+        </div>
+        <div class="stack">
+          <div class="timeline">
+            <div class="timeline-step"><strong>Observe</strong><span>Local services felt broken</span></div>
+            <div class="timeline-step"><strong>Talk</strong><span>Customers + professionals</span></div>
+            <div class="timeline-step"><strong>Page</strong><span>500+ organic sign-ups</span></div>
+            <div class="timeline-step"><strong>Enquire</strong><span>Real customer queries</span></div>
+            <div class="timeline-step"><strong>Request</strong><span>Six on launch day</span></div>
+          </div>
+          <p class="display-line">Evidence became progressively harder.</p>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://www.urbancompany.com/blog/urban-company-two-down-many-to-go">Urban Company — “Two Down, Many To Go”</a></span><span class="folio">04</span></footer>
+      <aside class="speaker-note">Ask which evidence was strongest: conversations, sign-ups, enquiries, or requests? Note that sign-ups demonstrate interest; service requests demonstrate a stronger intention to act.</aside>
+    </section>
+
+    <section class="slide" data-index="05" aria-label="Zerodha story">
+      <header class="slide-head"><span class="eyebrow">Case B / Problem-segment fit</span><span class="folio">Zerodha</span></header>
+      <div class="content grid-2" style="grid-template-columns:.86fr 1.14fr">
+        <div>
+          <img class="brand-logo logo-zerodha" src="assets/zerodha.png" alt="Zerodha logo">
+          <h2>Online traders.<br><span class="accent">Offline costs.</span></h2>
+          <p class="lead">A mismatch between how customers behaved and how the industry operated.</p>
+        </div>
+        <div class="grid-2" style="gap:16px;grid-template-columns:1.1fr .9fr">
+          <div class="photo-frame" data-caption="Nithin &amp; Nikhil Kamath"><img src="assets/kamath-brothers.jpg" alt="Nithin and Nikhil Kamath, founders of Zerodha"></div>
+          <div class="stack">
+            <article class="card"><span class="tag">Old model</span><p>Branches • sub-brokers • percentage fees</p></article>
+            <article class="card"><span class="tag">Proposition</span><p>Online-first • transparent • flat fee</p></article>
+          </div>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://zerodha.com/z-connect/general/our-story-till-now">Zerodha — “Our Story till now”</a> • Photo: Livemint</span><span class="folio">05</span></footer>
+      <aside class="speaker-note">Founder proximity created insight, not automatic validation. Ask: For whom was this most painful—active traders or occasional investors? The same friction has different severity across segments.</aside>
+    </section>
+
+    <section class="slide green" data-index="06" aria-label="Razorpay story">
+      <header class="slide-head"><span class="eyebrow">Case C / System problem</span><span class="folio">Razorpay</span></header>
+      <div class="content">
+        <img class="brand-logo logo-razorpay" src="assets/razorpay.png" alt="Razorpay logo">
+        <h2>Who owns a<br><span class="accent">failed payment?</span></h2>
+        <div class="grid-4">
+          <article class="card"><div class="card-number">01</div><h3>Consumer</h3><p>Cannot complete the purchase.</p></article>
+          <article class="card"><div class="card-number">02</div><h3>Merchant</h3><p>Loses revenue and trust.</p></article>
+          <article class="card"><div class="card-number">03</div><h3>Developer</h3><p>Manages difficult integration.</p></article>
+          <article class="card"><div class="card-number">04</div><h3>Finance</h3><p>Reconciles complex transactions.</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://razorpay.com/blog/razorpay-2-0-how-we-evolved-into-indias-first-converged-payments-solution/">Razorpay — early payments account</a></span><span class="folio">06</span></footer>
+      <aside class="speaker-note">Ask: Who is user, customer, buyer, and beneficiary? They may be different. “Payment failure” can be an event, symptom, and business consequence depending on whose perspective we use.</aside>
+    </section>
+
+    <section class="slide yellow" data-index="07" aria-label="Connection between stories">
+      <header class="slide-head"><span class="eyebrow">The common thread</span><span class="folio">Assumption audit</span></header>
+      <div class="content grid-2">
+        <h2>An idea is a bundle of <span class="accent">assumptions.</span></h2>
+        <ul class="clean checklist">
+          <li class="fragment">A specific customer has this problem.</li>
+          <li class="fragment">It occurs often enough to matter.</li>
+          <li class="fragment">Existing alternatives are inadequate.</li>
+          <li class="fragment">The customer wants change.</li>
+          <li class="fragment">We can create a better outcome.</li>
+          <li class="fragment">Someone will pay for that outcome.</li>
+        </ul>
+      </div>
+      <footer class="slide-foot"><strong>Discovery turns assumptions into evidence.</strong><span class="folio">07</span></footer>
+      <aside class="speaker-note">Discovery does not eliminate uncertainty. It reduces uncertainty enough to support the next decision.</aside>
+    </section>
+
+    <section class="slide" data-index="08" aria-label="Definition of a problem">
+      <header class="slide-head"><span class="eyebrow">Definition</span><span class="folio">A useful problem</span></header>
+      <div class="content">
+        <p class="display-line">A problem is a <span class="accent">barrier</span> to meaningful progress.</p>
+        <div class="grid-3" style="margin-top:38px">
+          <article class="card fragment"><div class="card-number">01</div><h3>Person + context</h3><p>Who experiences it, when and where?</p></article>
+          <article class="card fragment"><div class="card-number">02</div><h3>Progress + barrier</h3><p>What are they trying to do—and what blocks them?</p></article>
+          <article class="card fragment"><div class="card-number">03</div><h3>Consequence + evidence</h3><p>Why does it matter—and how do we know?</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Specific • consequential • evidenced</span><span class="folio">08</span></footer>
+      <aside class="speaker-note">A complaint is not automatically a valuable problem. It becomes useful for innovation when it is specific, consequential, and supported by evidence.</aside>
+    </section>
+
+    <section class="slide" data-index="09" aria-label="Anatomy of a problem">
+      <header class="slide-head"><span class="eyebrow">Problem anatomy</span><span class="folio">Follow the event</span></header>
+      <div class="content">
+        <h2>Trace the whole<br><span class="accent">experience.</span></h2>
+        <div class="flow">
+          <div class="fragment">Trigger<br><small>Tap begins leaking</small></div>
+          <div class="fragment">Progress<br><small>Repair it today</small></div>
+          <div class="fragment">Barrier<br><small>No trusted provider</small></div>
+          <div class="fragment">Behaviour<br><small>Call neighbours</small></div>
+          <div class="fragment">Consequence<br><small>Delay + stress</small></div>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Where, exactly, is the problem?</strong><span class="folio">09</span></footer>
+      <aside class="speaker-note">Let participants answer. Some will say the leak; others trust, discovery, availability, or quality. Use disagreement to demonstrate why framing requires investigation.</aside>
+    </section>
+
+    <section class="slide red" data-index="10" aria-label="Problem versus related concepts">
+      <header class="slide-head"><span class="eyebrow">Language check</span><span class="folio">Do not confuse these</span></header>
+      <div class="content">
+        <h2>One event.<br><span class="accent">Seven lenses.</span></h2>
+        <table class="table">
+          <tr><td>Observation</td><td>Customers leave the payment page.</td></tr>
+          <tr><td>Symptom</td><td>Checkout abandonment is high.</td></tr>
+          <tr><td>Problem</td><td>Customers cannot complete payment reliably.</td></tr>
+          <tr><td>Possible cause</td><td>Their preferred payment method frequently fails.</td></tr>
+          <tr><td>Need</td><td>Complete the purchase quickly and confidently.</td></tr>
+          <tr><td>Solution</td><td>Add another payment gateway.</td></tr>
+          <tr><td>Feature</td><td>Automatically route failed payments.</td></tr>
+        </table>
+      </div>
+      <footer class="slide-foot"><span class="kicker">A solution can masquerade as a need.</span><span class="folio">10</span></footer>
+      <aside class="speaker-note">Examples of disguised solutions: “I need an app,” “I need a dashboard,” “I need AI.” Those specify delivery mechanisms, not necessarily underlying needs.</aside>
+    </section>
+
+    <section class="slide yellow" data-index="11" aria-label="Classification activity">
+      <header class="slide-head"><span class="eyebrow">Activity / 5 minutes</span><span class="folio">Sort the statements</span></header>
+      <div class="content grid-2">
+        <div><h2>Problem, symptom, cause, need—or solution?</h2><span class="stamp">Discuss</span></div>
+        <ol class="stack">
+          <li class="fragment">Students do not complete online courses.</li>
+          <li class="fragment">Course completion is 18%.</li>
+          <li class="fragment">Students underestimate the weekly effort required.</li>
+          <li class="fragment">Students need to plan learning around unpredictable work.</li>
+          <li class="fragment">Send personalised WhatsApp reminders.</li>
+        </ol>
+      </div>
+      <footer class="slide-foot"><strong>Identify the missing evidence.</strong><span class="folio">11</span></footer>
+      <aside class="speaker-note">Suggested answer: 1 symptom/broad observation; 2 observation/data point; 3 cause hypothesis; 4 need; 5 solution. Context can change the classification. The debate matters more than rigid labels.</aside>
+    </section>
+
+    <section class="slide dark" data-index="12" aria-label="6P framework overview">
+      <header class="slide-head"><span class="eyebrow">The framework</span><span class="folio">6P</span></header>
+      <div class="content">
+        <h2>Six questions.<br><span class="accent">One decision trail.</span></h2>
+        <div class="six-p">
+          <div class="p-item fragment"><strong>Person</strong><span>Who experiences it?</span></div>
+          <div class="p-item fragment"><strong>Progress</strong><span>What are they trying to achieve?</span></div>
+          <div class="p-item fragment"><strong>Problem</strong><span>What prevents progress?</span></div>
+          <div class="p-item fragment"><strong>Proof</strong><span>What evidence exists?</span></div>
+          <div class="p-item fragment"><strong>Potential</strong><span>Is it worth solving?</span></div>
+          <div class="p-item fragment"><strong>Probe</strong><span>What should we test next?</span></div>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Do not design the solution before examining the first five Ps.</strong><span class="folio">12</span></footer>
+      <aside class="speaker-note">The framework is a decision aid, not a form-filling ritual. Every major claim should carry evidence or be explicitly marked as an assumption.</aside>
+    </section>
+
+    <section class="slide" data-index="13" aria-label="Person">
+      <header class="slide-head"><span class="eyebrow">P1 / Person</span><span class="folio">Segment by circumstance</span></header>
+      <div class="content grid-2">
+        <div><h2>Demographics tell us <span class="accent">where.</span><br>Behaviour tells us <span class="accent">why.</span></h2></div>
+        <div class="stack">
+          <article class="card fragment"><span class="tag">Weak</span><p class="lead">Urban Indian professionals aged 25–40.</p></article>
+          <article class="card fragment"><span class="tag">Stronger</span><p>Working adults who need an urgent home repair, lack a trusted provider, and cannot remain home for an uncertain arrival window.</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Behaviour • circumstance • trigger • constraint</span><span class="folio">13</span></footer>
+      <aside class="speaker-note">Also distinguish user, customer, buyer, influencer, and beneficiary. In B2B and marketplace settings, they are often different people.</aside>
+    </section>
+
+    <section class="slide green" data-index="14" aria-label="Progress">
+      <header class="slide-head"><span class="eyebrow">P2 / Progress</span><span class="folio">Jobs to Be Done</span></header>
+      <div class="content">
+        <h2>What change is the customer trying to make?</h2>
+        <div class="grid-3">
+          <article class="card fragment"><div class="card-number">F</div><h3>Functional</h3><p>“Repair the leaking tap.”</p></article>
+          <article class="card fragment"><div class="card-number">E</div><h3>Emotional</h3><p>“Feel confident that my home is safe.”</p></article>
+          <article class="card fragment"><div class="card-number">S</div><h3>Social</h3><p>“Be seen as a responsible tenant.”</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://www.christenseninstitute.org/theory/jobs-to-be-done/">Christensen Institute — Jobs to Be Done</a></span><span class="folio">14</span></footer>
+      <aside class="speaker-note">Customers “hire” products and services to make progress in specific circumstances. Avoid reducing the job to the functional task alone.</aside>
+    </section>
+
+    <section class="slide" data-index="15" aria-label="Problem layers">
+      <header class="slide-head"><span class="eyebrow">P3 / Problem</span><span class="folio">Four layers</span></header>
+      <div class="content">
+        <h2>Go beneath the<br><span class="accent">first complaint.</span></h2>
+        <div class="grid-4">
+          <article class="card fragment"><div class="card-number">01</div><h3>Friction</h3><p>What is difficult, slow, expensive, or confusing?</p></article>
+          <article class="card fragment"><div class="card-number">02</div><h3>Root cause</h3><p>Why does the friction exist?</p></article>
+          <article class="card fragment"><div class="card-number">03</div><h3>Workaround</h3><p>What does the customer do instead?</p></article>
+          <article class="card fragment"><div class="card-number">04</div><h3>Consequence</h3><p>What happens if it remains unresolved?</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>The first problem mentioned is often a symptom.</strong><span class="folio">15</span></footer>
+      <aside class="speaker-note">Use the “five whys” carefully: causes can form a system rather than one clean chain. Look for patterns across multiple customers, not one compelling story.</aside>
+    </section>
+
+    <section class="slide red" data-index="16" aria-label="Types of problems">
+      <header class="slide-head"><span class="eyebrow">Problem lenses</span><span class="folio">One situation, many forces</span></header>
+      <div class="content grid-2">
+        <h2>Which pain actually drives <span class="accent">behaviour?</span></h2>
+        <div class="grid-2" style="gap:12px">
+          <article class="card fragment"><h3>Functional</h3><p>Can I complete the task?</p></article>
+          <article class="card fragment"><h3>Emotional</h3><p>Do I feel safe or in control?</p></article>
+          <article class="card fragment"><h3>Social</h3><p>How does this affect how others see me?</p></article>
+          <article class="card fragment"><h3>Access / system</h3><p>What external constraint blocks me?</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Discovery? Trust? Availability? Quality? Accountability?</strong><span class="folio">16</span></footer>
+      <aside class="speaker-note">Ask which problem drove Urban Company. There may be multiple valid answers for different segments; that is why segment and context matter.</aside>
+    </section>
+
+    <section class="slide dark" data-index="17" aria-label="Evidence ladder">
+      <header class="slide-head"><span class="eyebrow">P4 / Proof</span><span class="folio">Evidence ladder</span></header>
+      <div class="content">
+        <h2>Move from words<br>to <span class="accent">commitment.</span></h2>
+        <div class="timeline" style="grid-template-columns:repeat(6,1fr)">
+          <div class="timeline-step fragment"><strong>Intuition</strong><span>“Surely…”</span></div>
+          <div class="timeline-step fragment"><strong>Opinion</strong><span>“Sounds useful”</span></div>
+          <div class="timeline-step fragment"><strong>Past behaviour</strong><span>“Last week…”</span></div>
+          <div class="timeline-step fragment"><strong>Observed act</strong><span>Watch it happen</span></div>
+          <div class="timeline-step fragment"><strong>Commitment</strong><span>Time / data / money</span></div>
+          <div class="timeline-step fragment"><strong>Repeated use</strong><span>Returns unaided</span></div>
+        </div>
+        <p class="quote fragment" style="margin-top:38px">What people say helps us discover. What they do helps us validate.</p>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://www.strategyzer.com/library/designing-strong-experiments">Strategyzer — Designing Strong Experiments</a></span><span class="folio">17</span></footer>
+      <aside class="speaker-note">Interviews are not bad evidence. They are excellent for circumstances, language, past behaviour, and causes. They are weaker for predicting future adoption or payment.</aside>
+    </section>
+
+    <section class="slide" data-index="18" aria-label="Interview questions">
+      <header class="slide-head"><span class="eyebrow">Customer discovery</span><span class="folio">Ask about events</span></header>
+      <div class="content grid-2">
+        <div>
+          <h2>Reality,<br><span class="accent">not theatre.</span></h2>
+          <ul class="clean">
+            <li class="fragment">Tell me about the last time.</li>
+            <li class="fragment">What triggered it?</li>
+            <li class="fragment">Walk me through what you did.</li>
+            <li class="fragment">What was most difficult?</li>
+            <li class="fragment">What did it cost you?</li>
+            <li class="fragment">Can you show me?</li>
+          </ul>
+        </div>
+        <article class="card fragment" style="background:var(--ink);color:var(--paper)">
+          <span class="stamp">Avoid</span>
+          <ul class="clean" style="margin-top:24px">
+            <li>Would you use an app?</li>
+            <li>Do you like this idea?</li>
+            <li>Wouldn’t this feature help?</li>
+            <li>How much would you pay for our solution?</li>
+          </ul>
+        </article>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://www.gov.uk/service-manual/user-research/start-by-learning-user-needs">GOV.UK — Learning about users and their needs</a></span><span class="folio">18</span></footer>
+      <aside class="speaker-note">Follow concrete events chronologically. Ask for artefacts and demonstrations. Avoid selling the idea during the interview.</aside>
+    </section>
+
+    <section class="slide yellow" data-index="19" aria-label="Latent demand">
+      <header class="slide-head"><span class="eyebrow">Latent demand</span><span class="folio">Hidden ≠ imaginary</span></header>
+      <div class="content grid-2">
+        <div><h2>Demand may whisper through <span class="accent">workarounds.</span></h2><p class="lead">But founder conviction is not evidence.</p></div>
+        <ul class="clean">
+          <li class="fragment">The customer accepts the problem as normal.</li>
+          <li class="fragment">Several partial solutions are combined.</li>
+          <li class="fragment">Substantial manual effort is spent.</li>
+          <li class="fragment">The consequence is paid for indirectly.</li>
+          <li class="fragment">The task is abandoned.</li>
+          <li class="fragment">Existing options are inaccessible.</li>
+        </ul>
+      </div>
+      <footer class="slide-foot"><strong>What behaviour exists even when explicit demand does not?</strong><span class="folio">19</span></footer>
+      <aside class="speaker-note">Absence of purchase is not proof of absence of need. But absence of behaviour should make us cautious. Seek effort, sacrifice, repeated frustration, indirect spend, or abandonment.</aside>
+    </section>
+
+    <section class="slide red" data-index="20" aria-label="Evidence court activity">
+      <header class="slide-head"><span class="eyebrow">Activity / 7 minutes</span><span class="folio">Evidence court</span></header>
+      <div class="content grid-2">
+        <div><h2>Rank the<br><span class="accent">evidence.</span></h2><span class="stamp">Strongest → weakest</span></div>
+        <ol class="stack">
+          <li class="fragment">Eight customers said they loved the idea.</li>
+          <li class="fragment">Three retailers copy WhatsApp orders into notebooks.</li>
+          <li class="fragment">Twenty people joined a free waitlist.</li>
+          <li class="fragment">Four customers paid a refundable ₹500 deposit.</li>
+          <li class="fragment">Thirty customers returned weekly for six weeks.</li>
+        </ol>
+      </div>
+      <footer class="slide-foot"><strong>What does each prove—and not prove?</strong><span class="folio">20</span></footer>
+      <aside class="speaker-note">Likely ranking: repeated use, deposit, observed workaround, waitlist, positive opinion. Context matters. A deposit shows commitment but not retention; repeated use shows value but may not show willingness to pay.</aside>
+    </section>
+
+    <section class="slide" data-index="21" aria-label="Assess problem potential">
+      <header class="slide-head"><span class="eyebrow">P5 / Potential</span><span class="folio">Three decisions</span></header>
+      <div class="content">
+        <h2>Attractive?<br><span class="accent">Or merely exciting?</span></h2>
+        <div class="grid-3">
+          <article class="card fragment"><div class="card-number">A</div><h3>Customer importance</h3><p>Frequency • severity • urgency • consequence • dissatisfaction</p></article>
+          <article class="card fragment"><div class="card-number">B</div><h3>Opportunity</h3><p>Reach • growth • access • willingness to pay • strategic fit</p></article>
+          <article class="card fragment"><div class="card-number">C</div><h3>Evidence confidence</h3><p>Relevance • recency • consistency • behaviour • contradictions</p></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Never hide weak evidence inside a high total score.</strong><span class="folio">21</span></footer>
+      <aside class="speaker-note">Score dimensions if helpful, but keep confidence separate from attractiveness. A compelling opportunity with weak evidence calls for research—not immediate investment.</aside>
+    </section>
+
+    <section class="slide" data-index="22" aria-label="Problem opportunity matrix">
+      <header class="slide-head"><span class="eyebrow">Decision map</span><span class="folio">Potential × evidence</span></header>
+      <div class="content grid-2">
+        <div><h2>Potential is not the same as <span class="accent">proof.</span></h2><p class="lead">Place the problem, then decide the next move.</p></div>
+        <div class="matrix">
+          <div></div><div class="axis">Low potential</div><div class="axis">High potential</div>
+          <div class="axis">Strong evidence</div><div class="quad"><strong>Focused opportunity</strong>Consider niche economics.</div><div class="quad hot"><strong>Prioritise</strong>Experiment toward a solution.</div>
+          <div class="axis">Weak evidence</div><div class="quad"><strong>Deprioritise</strong>Unless strategically important.</div><div class="quad"><strong>Research first</strong>Attractive hypothesis only.</div>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Where was Urban Company before—and after—the Facebook test?</strong><span class="folio">22</span></footer>
+      <aside class="speaker-note">Use this to separate desirability from confidence. Ask the group to move one of their own ideas across the matrix as evidence changes.</aside>
+    </section>
+
+    <section class="slide green" data-index="23" aria-label="Problem statement">
+      <header class="slide-head"><span class="eyebrow">Synthesis</span><span class="folio">Problem statement</span></header>
+      <div class="content">
+        <h2>Write what you know.<br>Label what you <span class="accent">believe.</span></h2>
+        <div class="quote fragment" style="max-width:32ch;font-size:clamp(24px,3vw,50px)">
+          When <strong>[person]</strong> is trying to <strong>[progress]</strong> during <strong>[context]</strong>, they struggle with <strong>[barrier]</strong>, resulting in <strong>[consequence]</strong>.
+        </div>
+        <p class="lead fragment" style="margin:24px 0 0 38px">We know this because <strong>[evidence]</strong>. We believe the cause is <strong>[hypothesis]</strong>, with <strong>[confidence]</strong>.</p>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Evidence ≠ interpretation ≠ assumption</span><span class="folio">23</span></footer>
+      <aside class="speaker-note">This formulation prevents an interpretation from being presented as fact. Ask participants to use language a customer would recognise.</aside>
+    </section>
+
+    <section class="slide" data-index="24" aria-label="Design thinking reframe">
+      <header class="slide-head"><span class="eyebrow">Design thinking</span><span class="folio">Reframe after evidence</span></header>
+      <div class="content">
+        <h2 style="max-width:none">Use the <span class="accent">reframing ladder.</span></h2>
+        <div class="reframe-diagram">
+          <div class="reframe-node fragment"><strong>1. Observation</strong><small>What did we actually see or hear?</small><p>“She called four providers.”</p></div>
+          <div class="reframe-arrow">→</div>
+          <div class="reframe-node fragment"><strong>2. Meaning</strong><small>Why does that behaviour exist?</small><p>Availability alone does not create confidence.</p></div>
+          <div class="reframe-arrow">→</div>
+          <div class="reframe-node fragment"><strong>3. Need</strong><small>What progress is blocked?</small><p>Arrange a reliable repair without an existing network.</p></div>
+          <div class="reframe-arrow">→</div>
+          <div class="reframe-node final fragment"><strong>4. How might we…?</strong><small>Open several solution paths</small><p>…create confidence before a professional arrives?</p></div>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="source"><a href="https://www.designkit.org/methods/frame-your-design-challenge.html">IDEO Design Kit — Frame Your Design Challenge</a></span><strong>Observation ≠ insight. Explain the behaviour.</strong><span class="folio">24</span></footer>
+      <aside class="speaker-note">Participants can reuse this four-step ladder. Require evidence in the observation, interpretation in meaning, outcome in need, and multiple possible answers in the How Might We question.</aside>
+    </section>
+
+    <section class="slide dark" data-index="25" aria-label="Probe the assumption">
+      <header class="slide-head"><span class="eyebrow">P6 / Probe</span><span class="folio">Design the learning</span></header>
+      <div class="content grid-2">
+        <h2>Test the assumption most likely to <span class="accent">kill</span> the idea.</h2>
+        <ol class="stack">
+          <li class="fragment">What must be true?</li>
+          <li class="fragment">Which belief is both critical and uncertain?</li>
+          <li class="fragment">What behaviour would support it?</li>
+          <li class="fragment">What is the cheapest credible test?</li>
+          <li class="fragment">What result would change our decision?</li>
+        </ol>
+      </div>
+      <footer class="slide-foot"><span class="quote" style="font-size:clamp(18px,2vw,32px)">The goal is learning—not defending the idea.</span><span class="folio">25</span></footer>
+      <aside class="speaker-note">Prioritise assumptions by impact and lack of evidence. Testing something easy but non-critical creates activity, not risk reduction.</aside>
+    </section>
+
+    <section class="slide yellow" data-index="26" aria-label="MVP as experiment">
+      <header class="slide-head"><span class="eyebrow">MVP</span><span class="folio">Smallest credible experiment</span></header>
+      <div class="content">
+        <h2 style="max-width:18ch">An MVP is not a small product. It is a <span class="accent">small, credible test.</span></h2>
+        <table class="table">
+          <thead><tr><th>Need to learn</th><th>Possible probe</th></tr></thead>
+          <tbody>
+            <tr><td>Does the problem occur?</td><td>Interview • observation • diary study</td></tr>
+            <tr><td>Will customers act?</td><td>Qualified sign-up • booking</td></tr>
+            <tr><td>Will customers trust us?</td><td>Concierge service • manual fulfilment</td></tr>
+            <tr><td>Can the approach work?</td><td>Prototype • Wizard-of-Oz test</td></tr>
+            <tr><td>Will customers pay?</td><td>Deposit • preorder • paid pilot</td></tr>
+            <tr><td>Will customers return?</td><td>Limited live service</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <footer class="slide-foot"><strong>Build only what the learning requires.</strong><span class="folio">26</span></footer>
+      <aside class="speaker-note">An early MVP can be manual and operationally inefficient. It is not designed to scale; it is designed to produce credible evidence.</aside>
+    </section>
+
+    <section class="slide red" data-index="27" aria-label="Experiment card">
+      <header class="slide-head"><span class="eyebrow">Experiment canvas</span><span class="folio">Define before you run</span></header>
+      <div class="content">
+        <h2 style="max-width:none">Design the experiment on <span class="accent">one page.</span></h2>
+        <div class="canvas">
+          <div class="canvas-cell fragment"><b>1 / Critical assumption</b><p>What must be true for the idea to work?</p></div>
+          <div class="canvas-cell fragment"><b>2 / Hypothesis</b><p>We believe [person] will [behaviour] because [problem].</p></div>
+          <div class="canvas-cell fragment"><b>3 / Participants</b><p>Who qualifies—and who must be excluded?</p></div>
+          <div class="canvas-cell fragment"><b>4 / Test + artefact</b><p>What will they encounter or do?</p></div>
+          <div class="canvas-cell fragment"><b>5 / Evidence + threshold</b><p>What observable result counts by when?</p></div>
+          <div class="canvas-cell fragment"><b>6 / Decision rule</b><p>If met: continue. If mixed: revise. If missed: stop or reframe.</p></div>
+        </div>
+      </div>
+      <footer class="slide-foot"><span class="stamp">Write the threshold before seeing results.</span><span class="folio">27</span></footer>
+      <aside class="speaker-note">Use this as a printable canvas. A strong threshold is observable and decision-linked—for example, five of ten qualified users complete a real booking within seven days. “Positive feedback” is not a threshold.</aside>
+    </section>
+
+    <section class="slide" data-index="28" aria-label="Practice problem statements">
+      <header class="slide-head"><span class="eyebrow">Practice / choose one</span><span class="folio">Apply the 6P lens</span></header>
+      <div class="content">
+        <h2 style="max-width:none">Three starting problems.<br><span class="accent">None fully proven.</span></h2>
+        <div class="grid-3">
+          <article class="card fragment"><div class="card-number">A</div><h3>Campus food</h3><p>Students with short class breaks struggle to buy lunch because peak-hour queues are unpredictable, causing them to skip meals or arrive late.</p><span class="tag">Evidence needed</span></article>
+          <article class="card fragment"><div class="card-number">B</div><h3>Small retailers</h3><p>Shop owners receiving orders through WhatsApp struggle to track fulfilment because customer messages and order records are mixed together, causing missed orders.</p><span class="tag">Evidence needed</span></article>
+          <article class="card fragment"><div class="card-number">C</div><h3>Career decisions</h3><p>First-generation final-year students struggle to compare realistic career paths because advice is generic and fragmented, causing delayed or poorly informed applications.</p><span class="tag">Evidence needed</span></article>
+        </div>
+      </div>
+      <footer class="slide-foot"><strong>Challenge the person, progress, problem, proof and potential.</strong><span class="folio">28</span></footer>
+      <aside class="speaker-note">Assign or let teams choose one. Their task is not to accept the statement: identify what is fact, interpretation, assumption, and unknown; then rewrite it and choose the riskiest assumption.</aside>
+    </section>
+
+    <section class="slide green" data-index="29" aria-label="Solution canvas and prompt">
+      <header class="slide-head"><span class="eyebrow">Solution canvas</span><span class="folio">Diverge → choose → test</span></header>
+      <div class="content">
+        <h2 style="max-width:none">Solution only after the <span class="accent">problem earns it.</span></h2>
+        <div class="canvas solution">
+          <div class="canvas-cell fragment"><b>1 / How might we?</b><p>Turn the validated need into an open challenge.</p></div>
+          <div class="canvas-cell fragment"><b>2 / Desired outcome</b><p>What must improve for the customer?</p></div>
+          <div class="canvas-cell fragment"><b>3 / Constraints</b><p>Time, access, trust, cost, policy, capability.</p></div>
+          <div class="canvas-cell fragment"><b>4 / Solution routes</b><p>Generate at least five meaningfully different approaches.</p></div>
+          <div class="canvas-cell fragment"><b>5 / Choice</b><p>Desirability × feasibility × viability × evidence.</p></div>
+          <div class="canvas-cell fragment"><b>6 / Smallest test</b><p>Which assumption does the chosen route expose?</p></div>
+        </div>
+        <div class="prompt-box fragment"><strong>Solutioning prompt:</strong> “Using this evidence-backed problem statement: [paste], generate 10 fundamentally different solution approaches. Respect these constraints: [paste]. Do not add features yet. Group ideas by mechanism, identify the assumption behind each, then recommend three concepts to prototype and explain what each prototype must teach us.”</div>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Generate alternatives before selecting features.</span><span class="folio">29</span></footer>
+      <aside class="speaker-note">Use this only after a team has an evidence-backed problem. The prompt uses AI as a divergence partner, not as a substitute for customer evidence or a final decision-maker.</aside>
+    </section>
+
+    <section class="slide dark" data-index="30" aria-label="Closing takeaway">
+      <header class="slide-head"><span class="eyebrow">Close the loop</span><span class="folio">The next honest step</span></header>
+      <div class="content">
+        <h2 class="closing-title">Leave with a better question—not just a better idea.</h2>
+        <div class="grid-3">
+          <article class="card fragment"><div class="card-number">01</div><h3>Name the assumption</h3><p>What are we treating as true without enough proof?</p></article>
+          <article class="card fragment"><div class="card-number">02</div><h3>Choose the evidence</h3><p>What customer behaviour would increase or reduce confidence?</p></article>
+          <article class="card fragment"><div class="card-number">03</div><h3>Run the next test</h3><p>What can we learn within seven days without building the full product?</p></article>
+        </div>
+        <p class="quote fragment" style="margin-top:38px;max-width:30ch">The quality of the solution cannot exceed the quality of the problem understanding behind it.</p>
+      </div>
+      <footer class="slide-foot"><span class="kicker">Person → Progress → Problem → Proof → Potential → Probe → Prototype</span><span class="folio">30</span></footer>
+      <aside class="speaker-note">End with a written commitment: one assumption, one customer behaviour, one seven-day experiment. Invite two people to read theirs aloud. The goal is a next action, not applause for the framework.</aside>
+    </section>
+  </main>
+
+  <aside class="notes" id="notes" aria-live="polite" aria-label="Speaker notes">
+    <h3>Speaker notes</h3><p id="notesText"></p>
+  </aside>
+
+  <nav class="controls" aria-label="Slide controls">
+    <button id="prev" aria-label="Previous slide" title="Previous (←)">←</button>
+    <button id="overview" aria-label="Toggle overview" title="Overview (O)">▦</button>
+    <span class="counter" id="counter">01 / 30</span>
+    <button id="notesBtn" aria-label="Toggle speaker notes" title="Notes (N)">N</button>
+    <button id="fullscreen" aria-label="Toggle fullscreen" title="Fullscreen (F)">⛶</button>
+    <button id="next" aria-label="Next slide" title="Next (→)">→</button>
+  </nav>
+
+  <div class="help" id="help" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+    <div class="help-card">
+      <h2 style="font-size:44px">Keyboard shortcuts</h2>
+      <p><kbd>←</kbd> <kbd>→</kbd> Navigate / reveal</p>
+      <p><kbd>O</kbd> Overview &nbsp; <kbd>N</kbd> Notes &nbsp; <kbd>F</kbd> Fullscreen</p>
+      <p><kbd>Home</kbd> First &nbsp; <kbd>End</kbd> Last &nbsp; <kbd>?</kbd> Help</p>
+      <p><kbd>Esc</kbd> Close panels</p>
+    </div>
+  </div>
+
+  <script>
+    (() => {
+      const slides = [...document.querySelectorAll('.slide')];
+      const counter = document.getElementById('counter');
+      const progress = document.querySelector('.progress');
+      const notes = document.getElementById('notes');
+      const notesText = document.getElementById('notesText');
+      const help = document.getElementById('help');
+      let index = Math.max(0, Number(location.hash.replace('#','')) - 1 || 0);
+
+      const pad = n => String(n).padStart(2, '0');
+      const fragments = () => [...slides[index].querySelectorAll('.fragment')];
+
+      function render(updateHash = true) {
+        slides.forEach((slide, i) => {
+          slide.classList.toggle('active', i === index);
+          slide.setAttribute('aria-hidden', i === index ? 'false' : 'true');
+        });
+        const current = slides[index];
+        counter.textContent = `${pad(index + 1)} / ${pad(slides.length)}`;
+        progress.style.width = `${((index + 1) / slides.length) * 100}%`;
+        notesText.textContent = current.querySelector('.speaker-note')?.textContent.trim() || 'No notes for this slide.';
+        if (updateHash) history.replaceState(null, '', `#${index + 1}`);
+        document.title = `${pad(index + 1)} · ${current.querySelector('h1,h2')?.textContent.trim() || 'Problem Discovery'}`;
+      }
+
+      function next() {
+        if (document.body.classList.contains('overview')) return;
+        const hidden = fragments().find(el => !el.classList.contains('revealed'));
+        if (hidden) { hidden.classList.add('revealed'); return; }
+        if (index < slides.length - 1) { index++; render(); }
+      }
+
+      function previous() {
+        if (document.body.classList.contains('overview')) return;
+        const visible = fragments().filter(el => el.classList.contains('revealed'));
+        if (visible.length) { visible.at(-1).classList.remove('revealed'); return; }
+        if (index > 0) { index--; render(); fragments().forEach(el => el.classList.add('revealed')); }
+      }
+
+      function toggleOverview(force) {
+        const state = typeof force === 'boolean' ? force : !document.body.classList.contains('overview');
+        document.body.classList.toggle('overview', state);
+        notes.classList.remove('open');
+        if (!state) render();
+      }
+
+      document.getElementById('next').addEventListener('click', next);
+      document.getElementById('prev').addEventListener('click', previous);
+      document.getElementById('overview').addEventListener('click', () => toggleOverview());
+      document.getElementById('notesBtn').addEventListener('click', () => notes.classList.toggle('open'));
+      document.getElementById('fullscreen').addEventListener('click', () => {
+        if (!document.fullscreenElement) document.documentElement.requestFullscreen?.();
+        else document.exitFullscreen?.();
+      });
+
+      slides.forEach((slide, i) => slide.addEventListener('click', () => {
+        if (!document.body.classList.contains('overview')) return;
+        index = i; toggleOverview(false);
+      }));
+
+      document.addEventListener('keydown', event => {
+        if (event.key === 'Escape') { notes.classList.remove('open'); help.classList.remove('open'); if (document.body.classList.contains('overview')) toggleOverview(false); return; }
+        if (event.key === 'ArrowRight' || event.key === 'PageDown' || event.key === ' ') { event.preventDefault(); next(); }
+        if (event.key === 'ArrowLeft' || event.key === 'PageUp') { event.preventDefault(); previous(); }
+        if (event.key.toLowerCase() === 'o') toggleOverview();
+        if (event.key.toLowerCase() === 'n') notes.classList.toggle('open');
+        if (event.key.toLowerCase() === 'f') document.getElementById('fullscreen').click();
+        if (event.key === 'Home') { index = 0; render(); }
+        if (event.key === 'End') { index = slides.length - 1; render(); fragments().forEach(el => el.classList.add('revealed')); }
+        if (event.key === '?') help.classList.toggle('open');
+      });
+
+      window.addEventListener('hashchange', () => {
+        const requested = Number(location.hash.replace('#','')) - 1;
+        if (Number.isInteger(requested) && requested >= 0 && requested < slides.length) { index = requested; render(false); }
+      });
+
+      render(false);
+    })();
+  </script>
+</body>
+</html>
