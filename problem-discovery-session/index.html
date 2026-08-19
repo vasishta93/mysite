@@ -58,7 +58,7 @@
       display: grid; grid-template-rows: auto 1fr auto; gap: clamp(18px, 3vh, 34px);
       overflow: hidden; background: var(--paper);
       opacity: 0; visibility: hidden; transform: scale(.975) translateY(14px);
-      transition: opacity .38s var(--ease), transform .48s var(--ease), visibility .38s;
+      transition: none;
       isolation: isolate;
     }
     .slide::before {
@@ -279,8 +279,7 @@
     body.overview .slide .card { padding: 10px; }
     body.overview .controls, body.overview .progress, body.overview .grain { position: fixed; }
 
-    .fragment { opacity: 0; transform: translateY(12px); transition: .4s var(--ease); }
-    .active .fragment.revealed, .overview .fragment { opacity: 1; transform: none; }
+    .fragment { opacity: 1; transform: none; transition: none; }
 
     @media (max-width: 860px) {
       .grid-2, .grid-3, .grid-4 { grid-template-columns: 1fr; gap: 12px; }
@@ -866,16 +865,12 @@
 
       function next() {
         if (document.body.classList.contains('overview')) return;
-        const hidden = fragments().find(el => !el.classList.contains('revealed'));
-        if (hidden) { hidden.classList.add('revealed'); return; }
         if (index < slides.length - 1) { index++; render(); }
       }
 
       function previous() {
         if (document.body.classList.contains('overview')) return;
-        const visible = fragments().filter(el => el.classList.contains('revealed'));
-        if (visible.length) { visible.at(-1).classList.remove('revealed'); return; }
-        if (index > 0) { index--; render(); fragments().forEach(el => el.classList.add('revealed')); }
+        if (index > 0) { index--; render(); }
       }
 
       function toggleOverview(force) {
@@ -907,7 +902,7 @@
         if (event.key.toLowerCase() === 'n') notes.classList.toggle('open');
         if (event.key.toLowerCase() === 'f') document.getElementById('fullscreen').click();
         if (event.key === 'Home') { index = 0; render(); }
-        if (event.key === 'End') { index = slides.length - 1; render(); fragments().forEach(el => el.classList.add('revealed')); }
+        if (event.key === 'End') { index = slides.length - 1; render(); }
         if (event.key === '?') help.classList.toggle('open');
       });
 
