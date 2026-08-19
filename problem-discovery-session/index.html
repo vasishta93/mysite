@@ -34,6 +34,29 @@
     button, a { font: inherit; }
     button { color: inherit; }
 
+    .access-gate {
+      position: fixed; inset: 0; z-index: 1000; display: grid; place-items: center;
+      padding: 24px; background: rgba(15,23,21,.93);
+    }
+    .access-gate[hidden] { display: none; }
+    .gate-card {
+      width: min(620px, 100%); padding: clamp(30px, 6vw, 64px);
+      background: var(--paper); border: 1px solid var(--ink); box-shadow: 12px 12px 0 var(--yellow);
+    }
+    .gate-label { margin: 0 0 18px; color: var(--red); font: 700 12px/1.2 "Courier New", monospace; letter-spacing: .14em; text-transform: uppercase; }
+    .gate-card h1 { margin: 0 0 18px; font: 700 clamp(42px, 7vw, 72px)/.92 Georgia, serif; letter-spacing: -.045em; }
+    .gate-card > p:not(.gate-label):not(.gate-status):not(.gate-note) { margin: 0 0 30px; max-width: 46ch; font-size: 17px; line-height: 1.5; }
+    .gate-field { display: grid; gap: 7px; margin-top: 16px; }
+    .gate-field label { font: 700 11px/1.2 "Courier New", monospace; letter-spacing: .12em; text-transform: uppercase; }
+    .gate-field input { min-height: 52px; width: 100%; border: 1px solid var(--ink); border-radius: 0; background: var(--white); padding: 0 15px; font: inherit; }
+    .gate-field input:focus { outline: 3px solid var(--yellow); outline-offset: 2px; }
+    .gate-submit { width: 100%; min-height: 54px; margin-top: 20px; border: 0; background: var(--ink); color: var(--white); cursor: pointer; font-weight: 800; }
+    .gate-submit:hover, .gate-submit:focus-visible { background: var(--red); }
+    .gate-submit:disabled { opacity: .65; cursor: wait; }
+    .gate-status { min-height: 20px; margin: 12px 0 0; color: var(--red-dark); font-size: 14px; }
+    .gate-note { margin: 5px 0 0; color: var(--muted); font: 11px/1.45 "Courier New", monospace; }
+    .gate-honeypot { position: absolute; left: -10000px; }
+
     .skip-link {
       position: fixed; top: 10px; left: 10px; z-index: 999;
       padding: 10px 14px; color: var(--white); background: var(--green);
@@ -311,6 +334,25 @@
   </style>
 </head>
 <body>
+  <section class="access-gate" id="accessGate" aria-labelledby="gateTitle">
+    <form class="gate-card" id="accessForm">
+      <p class="gate-label">Problem discovery / session access</p>
+      <h1 id="gateTitle">Before we begin.</h1>
+      <p>Leave your name and email to access the session. You’ll only need to do this once on this browser.</p>
+      <div class="gate-field">
+        <label for="accessName">Your name</label>
+        <input id="accessName" name="name" type="text" autocomplete="name" maxlength="100" required>
+      </div>
+      <div class="gate-field">
+        <label for="accessEmail">Your email</label>
+        <input id="accessEmail" name="email" type="email" inputmode="email" autocomplete="email" maxlength="254" placeholder="you@company.com" required>
+      </div>
+      <div class="gate-honeypot" aria-hidden="true"><label for="accessWebsite">Website</label><input id="accessWebsite" name="website" tabindex="-1" autocomplete="off"></div>
+      <button class="gate-submit" type="submit">Access the session →</button>
+      <p class="gate-status" id="gateStatus" role="status" aria-live="polite"></p>
+      <p class="gate-note">Your details are stored securely and are never sold.</p>
+    </form>
+  </section>
   <a class="skip-link" href="#main">Skip to current slide</a>
   <div class="grain" aria-hidden="true"></div>
   <div class="progress" aria-hidden="true"></div>
@@ -838,6 +880,44 @@
   </div>
 
   <script>
+    (() => {
+      const gate = document.getElementById('accessGate');
+      const form = document.getElementById('accessForm');
+      const status = document.getElementById('gateStatus');
+      const submit = form.querySelector('[type="submit"]');
+      const saved = localStorage.getItem('problem-discovery-access');
+      if (saved === 'granted') gate.hidden = true;
+
+      form.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const data = new FormData(form);
+        submit.disabled = true;
+        submit.textContent = 'Opening…';
+        status.textContent = '';
+        try {
+          const response = await fetch('/api/session-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: data.get('name'),
+              email: data.get('email'),
+              website: data.get('website'),
+              session: 'problem-discovery-session'
+            })
+          });
+          const result = await response.json();
+          if (!response.ok || !result.ok) throw new Error(result.message || 'Please try again.');
+          localStorage.setItem('problem-discovery-access', 'granted');
+          gate.hidden = true;
+          document.getElementById('main').focus({ preventScroll: true });
+        } catch (error) {
+          status.textContent = error.message;
+          submit.disabled = false;
+          submit.textContent = 'Access the session →';
+        }
+      });
+    })();
+
     (() => {
       const slides = [...document.querySelectorAll('.slide')];
       const counter = document.getElementById('counter');
