@@ -22,3 +22,8 @@ html,body{overflow-x:hidden}.mobile-nav{display:none}.proof-case a{margin-top:au
 @media(max-width:480px){.session-grid{grid-template-columns:1fr}.session-card{min-height:220px}.logo-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.logo-tile{padding:14px}.logo-grid img{height:72px}.hero-role{font-size:1.4rem}}
 
 .logo-tile:nth-child(2),.logo-tile:nth-child(3){background:var(--paper)}
+
+.college-connections{margin-top:48px;padding:24px 0;border-top:1px solid #45423b;border-bottom:1px solid #45423b}
+.college-connections h3{margin:0 0 20px;font:500 .72rem var(--mono);letter-spacing:.08em;text-transform:uppercase;color:#c4bdb2}
+.college-connections ul{display:flex;flex-wrap:wrap;gap:12px;list-style:none;padding:0;margin:0}
+.college-connections li{padding:12px 20px;border:1px solid #45423b;background:#252421;font-size:1.1rem;font-weight:700}
