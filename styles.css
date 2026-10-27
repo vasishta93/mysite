@@ -47,3 +47,5 @@ html,body{overflow-x:hidden}.mobile-nav{display:none}.proof-case a{margin-top:au
 .logo-grid img{max-width:180px;height:72px}
 @media(max-width:800px){.session-grid{grid-template-columns:1fr;gap:0}.logo-grid{gap:0 18px}.logo-tile,.logo-tile:nth-child(2),.logo-tile:nth-child(3){min-height:110px}}
 @media(max-width:480px){.college-connections ul{gap:0 20px}.college-connections li:not(:last-child)::after{right:-13px}.logo-grid img{height:66px}}
+
+.annotation{color:var(--ink)}
